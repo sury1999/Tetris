@@ -7,6 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let nextRandom = 0;
   let timerId;
   let score = 0;
+  const colors = [
+    'grey',
+    'red',
+    'purple',
+    'blue',
+    'green'
+  ];
+
   //The tetrominoes
 
   const lTetromino = [
@@ -17,17 +25,19 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   const tTetromino = [
-    [1, width, width + 1, width + 2],
     [1, width + 1, 2*width + 1, width + 2],
-    [width, width +1, width + 2, 2*width + 1],
-    [1, width +1, 2*width + 1, width]
+    [1, width, width + 1, width + 2],
+    [1, width +1, 2*width + 1, width],
+    [width, width +1, width + 2, 2*width + 1]
+
   ];
 
   const zTetromino = [
-    [0, 1, width + 1, width + 2],
     [2, width + 2, width + 1, 2*width + 1],
     [0, 1, width + 1, width + 2],
-    [2, width + 2, width + 1, 2*width + 1]
+    [2, width + 2, width + 1, 2*width + 1],
+    [0, 1, width + 1, width + 2]
+
   ];
 
   const oTetromino = [
@@ -55,7 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
 //draw the tetromino
   function draw() {
       current.forEach(index => {
-        squares[currentPosition + index].classList.add('tetromino')
+        squares[currentPosition + index].classList.add('tetromino');
+        squares[currentPosition + index].style.backgroundColor = colors[random];
       })
   }
 
@@ -64,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function undraw() {
   current.forEach(index => {
     squares[currentPosition + index].classList.remove('tetromino');
+    squares[currentPosition + index].style.backgroundColor = '';
 })
 }
 
@@ -150,6 +162,23 @@ function rotate()
   {
     currentRotation = 0;
   }
+
+  // so shapes dont wrap through left wall and into the right
+    if(current.some(index => (currentPosition + index) % width === 0))
+  {
+      currentRotation = 0;
+  }
+
+  //so shapes dont wrap through the right wall and into the left
+  if(current.some(index => (currentPosition + index) % width === width - 1))
+  {
+    currentRotation = 2;
+  }
+ // i tetromino clipping through right wall
+  if(random == 4 && current.some(index => (currentPosition + index) % width === width - 2))
+  {
+    currentRotation = 2;
+  }
   current = theTetrominoes[random][currentRotation];
   draw();
 }
@@ -177,9 +206,11 @@ function displayShape()
 {
   displaySquares.forEach(square => {
     square.classList.remove('tetromino')
+    square.style.backgroundColor = "";
   })
   upNextTetrominoes[nextRandom].forEach(index => {
     displaySquares[displayIndex + index].classList.add('tetromino');
+    displaySquares[displayIndex + index].style.backgroundColor = colors[nextRandom];
   })
 }
 
@@ -213,6 +244,7 @@ function addScore()
         row.forEach(index => {
           squares[index].classList.remove('taken')
           squares[index].classList.remove('tetromino')
+          squares[index].style.backgroundColor = '';
         })
         const squaresRemoved = squares.splice(i,width);
         squares = squaresRemoved.concat(squares);
